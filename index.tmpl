@@ -1,0 +1,8 @@
+<html>
+	<body style="background: #404; color: #eddbb2;">
+		<ul>
+		{{ range . }}
+			<big><pre>{{ .ID }} {{ .Desc }} {{ .Done }}</pre></big>
+		{{ end }}
+	</body>
+</html>
