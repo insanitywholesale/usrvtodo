@@ -1,2 +1,2 @@
-- fix create/delete/update to use forms
 - make errors return html by adding an error template
+- style it up
