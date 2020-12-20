@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Todo</title>
+		<title>ToDo</title>
 	</head>
 	<body style="background: #404; color: #eddbb2;">
 		<ul>
@@ -13,7 +13,21 @@
 			<input type="text" id="desc" name="desc"><br>
 			<label for="done">Done:</label><br>
 			<input type="checkbox" id="done" name="done" value="true"><br>
-			<input type="submit" value="Submit">
+			<input type="submit" value="Create">
+		</form>
+		<form method="post" action="/todo/edit">
+			<label for="id">ID:</label><br>
+			<input type="text" id="id" name="id"><br>
+			<label for="desc">Description:</label><br>
+			<input type="text" id="desc" name="desc"><br>
+			<label for="done">Done:</label><br>
+			<input type="checkbox" id="done" name="done" value="true"><br>
+			<input type="submit" value="Edit">
+		</form>
+		<form method="post" action="/todo/delete">
+			<label for="id">ID:</label><br>
+			<input type="text" id="id" name="id"><br>
+			<input type="submit" value="Delete">
 		</form>
 	</body>
 </html>
