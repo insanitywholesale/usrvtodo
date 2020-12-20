@@ -4,16 +4,16 @@
 	</head>
 	<body style="background: #404; color: #eddbb2;">
 	<center>
-		<ul>
+		<ul style="padding-left: 40%; padding-right: 35%;">
 		{{ range . }}
 			<big>
-				<pre>{{ .ID }} {{ .Desc }} {{ .Done }}</pre>
 				<form method="post" action="/todo/delete">
-					<input type="text" id="idboi" name="idboi" value="{{ .ID }}">
-					<input type="submit" value="Delete">
-					<h1>{{ .ID }}</h1>
+					<input style="display:none;" type="text" id="idboi" name="idboi" value="{{ .ID }}">
+					<label style="float: left">{{ .ID }} {{ .Desc }} {{ .Done }}</label>
+					<input style="float: right" type="submit" value="Delete">
 				</form>
 			</big>
+			<br>
 		{{ end }}
 		</ul>
 
