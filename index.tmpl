@@ -4,13 +4,13 @@
 	</head>
 	<body style="background: #404; color: #eddbb2;">
 	<center>
-		<ul style="padding-left: 40%; padding-right: 35%;">
+		<ul>
 		{{ range . }}
 			<big>
 				<form method="post" action="/todo/delete">
 					<input style="display:none;" type="text" id="idboi" name="idboi" value="{{ .ID }}">
-					<label style="float: left">{{ .ID }} {{ .Desc }} {{ .Done }}</label>
-					<input style="float: right" type="submit" value="Delete">
+					<label>{{ .ID }} {{ .Desc }} {{ .Done }}</label>
+					<input type="submit" value="Delete">
 				</form>
 			</big>
 			<br>
