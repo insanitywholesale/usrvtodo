@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"strconv"
-	//"log"
 )
 
 type Todo struct {
@@ -121,10 +121,10 @@ func GetTodos2(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.tmpl", todoList)
 }
 
-func GetTodo2(c *gin.Context) {//actually implement this
+func GetTodo2(c *gin.Context) { //actually implement this
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "badparse"})//make it return html
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "badparse"}) //make it return html
 	}
 	var todo Todo
 	for _, todo := range todoList {
@@ -134,17 +134,17 @@ func GetTodo2(c *gin.Context) {//actually implement this
 		}
 	}
 	if (todo == Todo{}) {
-		c.JSON(http.StatusNotFound, gin.H{"error": "notfound"})//make it return html
+		c.JSON(http.StatusNotFound, gin.H{"error": "notfound"}) //make it return html
 	}
 }
 
-func CreateTodo2(c *gin.Context) {//adjust to use form
+func CreateTodo2(c *gin.Context) { //adjust to use form
 	id := int64(len(todoList))
 	desc := c.DefaultPostForm("desc", "")
 	formDone := c.DefaultPostForm("done", "false")
 	done, err := strconv.ParseBool(formDone)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "badparse"})//make it return html
+		c.JSON(http.StatusBadRequest, gin.H{"error": "badparse"}) //make it return html
 		return
 	}
 	var input Todo = Todo{ID: id, Desc: desc, Done: done}
@@ -152,7 +152,7 @@ func CreateTodo2(c *gin.Context) {//adjust to use form
 	c.Redirect(http.StatusFound, "/todo")
 }
 
-func UpdateTodo2(c *gin.Context) {//adjust to use form
+func UpdateTodo2(c *gin.Context) { //adjust to use form
 	//fix logical problem here
 	//only works for id==0
 	//for _, todo := range todoList {
@@ -166,13 +166,13 @@ func UpdateTodo2(c *gin.Context) {//adjust to use form
 	formID := c.PostForm("id")
 	id, err := strconv.ParseInt(formID, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "badparse"})//make it return html
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "badparse"}) //make it return html
 	}
 	desc := c.DefaultPostForm("desc", "")
 	formDone := c.DefaultPostForm("done", "false")
 	done, err := strconv.ParseBool(formDone)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "badparse"})//make it return html
+		c.JSON(http.StatusBadRequest, gin.H{"error": "badparse"}) //make it return html
 		return
 	}
 	for _, todo := range todoList {
@@ -191,13 +191,19 @@ func UpdateTodo2(c *gin.Context) {//adjust to use form
 	}
 }
 
-func DeleteTodo2(c *gin.Context) {//adjust to use form
-	formID := c.PostForm("id")
+func DeleteTodo2(c *gin.Context) { //adjust to use form
+	formID := c.PostForm("idboi")
 	id, err := strconv.ParseInt(formID, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "badparse"})//make it return html
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "badparse"}) //make it return html
 	}
-	todoList = append(todoList[:id], todoList[id+1:]...)
+	var idx int
+	for i, todo := range todoList {
+		if todo.ID == id {
+			idx = i
+		}
+	}
+	todoList = append(todoList[:idx], todoList[idx+1:]...)
 	c.Redirect(http.StatusFound, "/todo")
 }
 
@@ -218,4 +224,5 @@ func main() {
 	r.POST("/todo/delete", DeleteTodo2)
 	//if env var PORT is set, it will use that
 	r.Run()
+	log.Println("they see me loggin', they hatin'")
 }

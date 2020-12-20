@@ -3,11 +3,24 @@
 		<title>ToDo</title>
 	</head>
 	<body style="background: #404; color: #eddbb2;">
+	<center>
 		<ul>
 		{{ range . }}
-			<big><pre>{{ .ID }} {{ .Desc }} {{ .Done }}</pre></big>
+			<big>
+				<pre>{{ .ID }} {{ .Desc }} {{ .Done }}</pre>
+				<form method="post" action="/todo/delete">
+					<input type="text" id="idboi" name="idboi" value="{{ .ID }}">
+					<input type="submit" value="Delete">
+					<h1>{{ .ID }}</h1>
+				</form>
+			</big>
 		{{ end }}
 		</ul>
+
+		<br>
+		<hr>
+		<br>
+
 		<form method="post" action="/todo/new">
 			<label for="desc">Description:</label><br>
 			<input type="text" id="desc" name="desc"><br>
@@ -15,6 +28,7 @@
 			<input type="checkbox" id="done" name="done" value="true"><br>
 			<input type="submit" value="Create">
 		</form>
+		<hr>
 		<form method="post" action="/todo/edit">
 			<label for="id">ID:</label><br>
 			<input type="text" id="id" name="id"><br>
@@ -24,10 +38,12 @@
 			<input type="checkbox" id="done" name="done" value="true"><br>
 			<input type="submit" value="Edit">
 		</form>
-		<form method="post" action="/todo/delete">
+		<hr>
+		<!--form method="post" action="/todo/delete">
 			<label for="id">ID:</label><br>
 			<input type="text" id="id" name="id"><br>
 			<input type="submit" value="Delete">
-		</form>
+		</form-->
+	</center>
 	</body>
 </html>
