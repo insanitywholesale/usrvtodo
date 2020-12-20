@@ -1,8 +1,19 @@
 <html>
+	<head>
+		<title>Todo</title>
+	</head>
 	<body style="background: #404; color: #eddbb2;">
 		<ul>
 		{{ range . }}
 			<big><pre>{{ .ID }} {{ .Desc }} {{ .Done }}</pre></big>
 		{{ end }}
+		</ul>
+		<form method="post" action="/todo/new">
+			<label for="desc">Description:</label><br>
+			<input type="text" id="desc" name="desc"><br>
+			<label for="done">Done:</label><br>
+			<input type="checkbox" id="done" name="done" value="true"><br>
+			<input type="submit" value="Submit">
+		</form>
 	</body>
 </html>

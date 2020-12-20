@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"log"
 )
 
 type Todo struct {
@@ -139,14 +140,23 @@ func GetTodo2(c *gin.Context) {
 
 func CreateTodo2(c *gin.Context) {//adjust to use form
 	id := int64(len(todoList))
-	var input Todo = Todo{ID: id, Desc: "", Done: false}
-	err := c.ShouldBindJSON(&input)
+	desc := c.DefaultPostForm("desc", "")
+	formDone := c.DefaultPostForm("done", "false")
+	done, err := strconv.ParseBool(formDone)
+	log.Println("id:", id, "desc:", desc, "formDone:", formDone, "done:", done)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "badrequest"})//make it return html
+		c.JSON(http.StatusBadRequest, gin.H{"error": "badparse"})//make it return html
 		return
 	}
+	var input Todo = Todo{ID: id, Desc: desc, Done: done}
+	//err = c.ShouldBindJSON(&input)
+	//if err != nil {
+	//	log.Println("err", err)
+	//	c.JSON(http.StatusBadRequest, gin.H{"error": "badrequest"})//make it return html
+	//	return
+	//}
 	todoList = append(todoList, &input)
-	c.Redirect(http.StatusOK, "/todo/get")
+	c.Redirect(http.StatusFound, "/todo/get")
 }
 
 func UpdateTodo2(c *gin.Context) {//adjust to use form
