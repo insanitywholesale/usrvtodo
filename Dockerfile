@@ -13,6 +13,7 @@ RUN adduser -D -u 5000 app
 USER app:app
 WORKDIR /go/bin/
 COPY --from=build /go/bin/usrvtodo /go/bin/usrvtodo
+COPY --from=build /go/src/usrvtodo/index.tmpl /go/bin/index.tmpl
 EXPOSE 8080
 ENV GIN_MODE release
 CMD ["/go/bin/usrvtodo"]
