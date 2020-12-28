@@ -114,7 +114,7 @@ func GetTodo2(c *gin.Context) { //actually implement this
 	c.HTML(http.StatusOK, "index.tmpl", todo)
 }
 
-func CreateTodo2(c *gin.Context) { //adjust to use form
+func CreateTodo2(c *gin.Context) {
 	desc := c.DefaultPostForm("desc", "")
 	formDone := c.DefaultPostForm("done", "false")
 	done, err := strconv.ParseBool(formDone)
@@ -128,7 +128,7 @@ func CreateTodo2(c *gin.Context) { //adjust to use form
 	c.Redirect(http.StatusFound, "/todo")
 }
 
-func UpdateTodo2(c *gin.Context) { //adjust to use form
+func UpdateTodo2(c *gin.Context) {
 	formID := c.PostForm("id")
 	id, err := strconv.ParseInt(formID, 10, 64)
 	if err != nil {
@@ -158,11 +158,14 @@ func UpdateTodo2(c *gin.Context) { //adjust to use form
 	c.Redirect(http.StatusFound, "/todo")
 }
 
-func DeleteTodo2(c *gin.Context) { //adjust to use form
+func DeleteTodo2(c *gin.Context) {
 	formID := c.PostForm("idboi")
+	var id int
+	id = 0
 	id, err := strconv.ParseInt(formID, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "badparse"}) //make it return html
+		return
 	}
 	var todo Todo
 	err = DB.Where("id = ?", id).First(&todo).Error
