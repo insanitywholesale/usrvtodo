@@ -2,10 +2,14 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"log"
 	"net/http"
 	"strconv"
 )
+
+// types
 
 type Todo struct {
 	ID   int64  `json:"id" gorm:"primary_key"`
@@ -13,161 +17,110 @@ type Todo struct {
 	Done bool   `json:"done"`
 }
 
-type Todos []*Todo
-
-var todoList Todos = []*Todo{
-	&Todo{
-		ID:   0,
-		Desc: "finish api",
-		Done: true,
-	},
-	&Todo{
-		ID:   1,
-		Desc: "add data store",
-		Done: false,
-	},
-	&Todo{
-		ID:   2,
-		Desc: "add tests",
-		Done: false,
-	},
-	&Todo{
-		ID:   3,
-		Desc: "host on todo.distro.watch",
-		Done: true,
-	},
+type CreateTodoInput struct {
+	Desc string `json:"desc" binding:"required"`
+	Done bool `json:"done" binding:"required"`
 }
 
-func GetTodo(c *gin.Context) {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+type UpdateTodoInput struct {
+	Desc string `json:"desc"`
+	Done bool `json:"done"`
+}
+
+var DB *gorm.DB
+
+func ConnectDB() {
+	db, err := gorm.Open("sqlite3", "todo.db")
+	log.Println("connected to database:", db)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "badparse"})
+		panic("Failed to connect to database!")
 	}
-	var todo Todo
-	for _, todo := range todoList {
-		if todo.ID == id {
-			c.JSON(http.StatusOK, todo)
-			return
-		}
-	}
-	if (todo == Todo{}) {
-		c.JSON(http.StatusNotFound, gin.H{"error": "notfound"})
-	}
+	db.AutoMigrate(&Todo{})
+	DB = db
 }
 
 func GetTodos(c *gin.Context) {
-	c.JSON(http.StatusOK, todoList)
+	var todos []Todo
+	DB.Find(&todos)
+	c.JSON(http.StatusOK, todos)
+}
+
+func GetTodo(c *gin.Context) {
+	var todo Todo
+	err := DB.Where("id = ?", c.Param("id")).First(&todo).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "notfound"})
+		return
+	}
+	c.JSON(http.StatusOK, todo)
 }
 
 func CreateTodo(c *gin.Context) {
-	id := int64(len(todoList))
-	var input Todo = Todo{ID: id, Desc: "", Done: false}
+	var input CreateTodoInput
 	err := c.ShouldBindJSON(&input)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "badrequest"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	todoList = append(todoList, &input)
-	c.JSON(http.StatusOK, input)
+	todo := Todo{Desc: input.Desc, Done: input.Done}
+	DB.Create(&todo)
+	c.JSON(http.StatusOK, todo)
 }
 
 func UpdateTodo(c *gin.Context) {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	var todo Todo
+	err := DB.Where("id = ?", c.Param("id")).First(&todo).Error
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "badparse"})
-	}
-	//fix logical problem here
-	//only works for id==0
-	//for _, todo := range todoList {
-	//	if todo.ID == id {
-	//		break
-	//	} else {
-	//		c.JSON(http.StatusBadRequest, gin.H{"error": "badrequest"})
-	//		return
-	//	}
-	//}
-	var input Todo
-	err = c.ShouldBindJSON(&input)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "notfound"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "notfound"})
 		return
 	}
-	for _, todo := range todoList {
-		if todo.ID == id {
-			//avoid impacting the other variable if only one needs to be changed
-			if input.Desc != "" {
-				todoList[id].Desc = input.Desc
-			}
-			if input.Done != todoList[id].Done {
-				todoList[id].Done = input.Done
-			}
-		}
+	var input UpdateTodoInput
+	err = c.ShouldBindJSON(&input)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
+	DB.Model(&todo).Updates(input)
+	c.JSON(http.StatusOK, todo)
 }
 
 func DeleteTodo(c *gin.Context) {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	var todo Todo
+	err := DB.Where("id = ?", c.Param("id")).First(&todo).Error
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "badparse"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "notfound"})
+		return
 	}
-	tobedeleted := todoList[id]
-	todoList = append(todoList[:id], todoList[id+1:]...)
-	c.JSON(http.StatusOK, tobedeleted)
+	DB.Delete(&todo)
+	c.JSON(http.StatusOK, todo)
 }
 
-//for html frontend
+//
+// for html frontend
+//
 
 func GetTodos2(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.tmpl", todoList)
+	var todos []Todo
+	DB.Find(&todos)
+	c.HTML(http.StatusOK, "index.tmpl", todos)
 }
 
 func GetTodo2(c *gin.Context) { //actually implement this
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "badparse"}) //make it return html
-	}
-	var todo Todo
-	for _, todo := range todoList {
-		if todo.ID == id {
-			c.HTML(http.StatusOK, "index.tmpl", []*Todo{todo})
-			return
-		}
-	}
-	if (todo == Todo{}) {
-		c.JSON(http.StatusNotFound, gin.H{"error": "notfound"}) //make it return html
-	}
-}
-
-func CreateTodo2(c *gin.Context) { //adjust to use form
-	id := int64(len(todoList))
-	desc := c.DefaultPostForm("desc", "")
-	formDone := c.DefaultPostForm("done", "false")
-	done, err := strconv.ParseBool(formDone)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "badparse"}) //make it return html
-		return
-	}
-	var input Todo = Todo{ID: id, Desc: desc, Done: done}
-	todoList = append(todoList, &input)
-	c.Redirect(http.StatusFound, "/todo")
-}
-
-func UpdateTodo2(c *gin.Context) { //adjust to use form
-	//fix logical problem here
-	//only works for id==0
-	//for _, todo := range todoList {
-	//	if todo.ID == id {
-	//		break
-	//	} else {
-	//		c.JSON(http.StatusBadRequest, gin.H{"error": "badrequest"})//make it return html
-	//		return
-	//	}
-	//}
 	formID := c.PostForm("id")
 	id, err := strconv.ParseInt(formID, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "badparse"}) //make it return html
 	}
+	var todo Todo
+	err = DB.Where("id = ?", id).First(&todo).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "notfound"})
+		return
+	}
+	c.HTML(http.StatusOK, "index.tmpl", todo)
+}
+
+func CreateTodo2(c *gin.Context) { //adjust to use form
 	desc := c.DefaultPostForm("desc", "")
 	formDone := c.DefaultPostForm("done", "false")
 	done, err := strconv.ParseBool(formDone)
@@ -175,20 +128,40 @@ func UpdateTodo2(c *gin.Context) { //adjust to use form
 		c.JSON(http.StatusBadRequest, gin.H{"error": "badparse"}) //make it return html
 		return
 	}
-	for _, todo := range todoList {
-		if todo.ID == id {
-			//avoid impacting the other variable if only one needs to be changed
-			if desc != "" {
-				todoList[id].Desc = desc
-				c.Redirect(http.StatusFound, "/todo")
-			}
-			if done != todoList[id].Done {
-				todoList[id].Done = done
-				c.Redirect(http.StatusFound, "/todo")
 
-			}
-		}
+	todo := Todo{Desc: desc, Done: done}
+	DB.Create(&todo)
+	c.Redirect(http.StatusFound, "/todo")
+}
+
+func UpdateTodo2(c *gin.Context) { //adjust to use form
+	formID := c.PostForm("id")
+	id, err := strconv.ParseInt(formID, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "badparse"}) //make it return html
 	}
+	desc := c.PostForm("desc")
+	formDone := c.DefaultPostForm("done", "false")
+	log.Println("formDone:", formDone)
+	done, err := strconv.ParseBool(formDone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "badparse"}) //make it return html
+		return
+	}
+
+	var todo Todo
+	err = DB.Where("id = ?", id).First(&todo).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "notfound"})
+		return
+	}
+	if desc != "" {
+		DB.Model(&todo).Updates(map[string]interface{}{"desc": desc})
+	}
+	if done != todo.Done {
+		DB.Model(&todo).Updates(map[string]interface{}{"done": done})
+	}
+	c.Redirect(http.StatusFound, "/todo")
 }
 
 func DeleteTodo2(c *gin.Context) { //adjust to use form
@@ -197,17 +170,18 @@ func DeleteTodo2(c *gin.Context) { //adjust to use form
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "badparse"}) //make it return html
 	}
-	var idx int
-	for i, todo := range todoList {
-		if todo.ID == id {
-			idx = i
-		}
+	var todo Todo
+	err = DB.Where("id = ?", id).First(&todo).Error
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "notfound"})
+		return
 	}
-	todoList = append(todoList[:idx], todoList[idx+1:]...)
+	DB.Delete(&todo)
 	c.Redirect(http.StatusFound, "/todo")
 }
 
 func main() {
+	ConnectDB()
 	r := gin.Default()
 	//standard api routes
 	r.GET("/api/todo", GetTodos)

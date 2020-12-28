@@ -9,7 +9,7 @@
 			<big>
 				<form method="post" action="/todo/delete">
 					<input style="display:none;" type="text" id="idboi" name="idboi" value="{{ .ID }}">
-					<label>{{ .ID }} {{ .Desc }} {{ .Done }}</label>
+					<label>{{ .ID }}. {{ .Desc }} -- {{ .Done }}</label>
 					<input type="submit" value="Delete">
 				</form>
 			</big>
@@ -26,6 +26,7 @@
 			<input type="text" id="desc" name="desc"><br>
 			<label for="done">Done:</label><br>
 			<input type="checkbox" id="done" name="done" value="true"><br>
+
 			<input type="submit" value="Create">
 		</form>
 		<hr>
@@ -36,6 +37,7 @@
 			<input type="text" id="desc" name="desc"><br>
 			<label for="done">Done:</label><br>
 			<input type="checkbox" id="done" name="done" value="true"><br>
+
 			<input type="submit" value="Edit">
 		</form>
 		<hr>

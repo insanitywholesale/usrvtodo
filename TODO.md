@@ -1,2 +1,4 @@
 - make errors return html by adding an error template
 - style it up
+- write tests
+- add reset function that loads data from json file
