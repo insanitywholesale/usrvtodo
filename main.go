@@ -9,8 +9,6 @@ import (
 	"strconv"
 )
 
-// types
-
 type Todo struct {
 	ID   int64  `json:"id" gorm:"primary_key"`
 	Desc string `json:"desc"`
@@ -94,10 +92,6 @@ func DeleteTodo(c *gin.Context) {
 	DB.Delete(&todo)
 	c.JSON(http.StatusOK, todo)
 }
-
-//
-// for html frontend
-//
 
 func GetTodos2(c *gin.Context) {
 	var todos []Todo
