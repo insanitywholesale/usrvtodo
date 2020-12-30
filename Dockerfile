@@ -1,5 +1,6 @@
 # build stage
-FROM golang:1.15 as build
+FROM golang:alpine as build
+RUN apk add --no-cache git build-base alpine-sdk
 ENV GOPROXY http://oldboi.hell,direct
 ENV GO111MODULE off
 WORKDIR /go/src/usrvtodo
@@ -10,14 +11,17 @@ RUN go get -d -v
 # this doesn't actually work fully
 # workaround in run stage is for this
 # after adding the tags, one of the previous errors went away
-RUN go build -v -tags 'osusergo netgo static_build' -ldflags '-extldflags "-static"'
+RUN go build -v -tags 'osusergo netgo static static_build' -ldflags '-linkmode external -extldflags "-static"'
 RUN go install -v
 
 
 # run stage
-FROM busybox:glibc
+# changed from busybox to alpine
+# busybox was giving me:
+# standard_init_linux.go:211: exec user process caused "no such file or directory"
+FROM alpine
 # unable to link fully statically so this is needed
-COPY --from=build /lib/x86*/libdl* /lib/
+#COPY --from=build /lib/x86*/libdl* /lib/
 # set path for database
 ENV DB_PATH /data/todo.db
 # put gin in production mode
@@ -25,6 +29,7 @@ ENV GIN_MODE release
 # add and use non-root user
 RUN adduser -D -u 5000 -g 5000 app
 USER app:app
+WORKDIR /data
 WORKDIR /go/bin
 # copy files from build stage that are required at runtime
 COPY --from=build /go/bin/usrvtodo /go/bin/
