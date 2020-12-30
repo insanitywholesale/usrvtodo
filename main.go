@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"os"
 )
 
 type Todo struct {
@@ -28,11 +29,16 @@ type UpdateTodoInput struct {
 var DB *gorm.DB
 
 func ConnectDB() {
-	db, err := gorm.Open("sqlite3", "todo.db")
-	log.Println("connected to database:", db)
-	if err != nil {
-		panic("Failed to connect to database!")
+	dbPath := "todo.db"
+	if os.Getenv("DB_PATH") != "" {
+		dbPath = os.Getenv("DB_PATH")
 	}
+	db, err := gorm.Open("sqlite3", dbPath)
+	if err != nil {
+		//panic("Failed to connect to database!")
+		log.Println("DB error:", err)
+	}
+	log.Println("connected to database:", db)
 	db.AutoMigrate(&Todo{})
 	DB = db
 }
