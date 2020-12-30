@@ -9,7 +9,8 @@ COPY *db ./
 RUN go get -d -v
 # this doesn't actually work fully
 # workaround in run stage is for this
-RUN go build -v -ldflags '-linkmode external -extldflags "-static"'
+# after adding the tags, one of the previous errors went away
+RUN go build -v -tags 'osusergo netgo static_build' -ldflags '-extldflags "-static"'
 RUN go install -v
 
 
