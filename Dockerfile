@@ -6,14 +6,12 @@ ENV GO111MODULE off
 WORKDIR /go/src/usrvtodo
 COPY *go* ./
 COPY *tmpl ./
-COPY *db ./
 RUN go get -d -v
 # this doesn't actually work fully
 # workaround in run stage is for this
 # after adding the tags, one of the previous errors went away
 RUN go build -v -tags 'osusergo netgo static static_build' -ldflags '-linkmode external -extldflags "-static"'
 RUN go install -v
-
 
 # run stage
 # changed from busybox to alpine
@@ -27,15 +25,17 @@ ENV DB_PATH /data/todo.db
 # put gin in production mode
 ENV GIN_MODE release
 # add and use non-root user
+RUN mkdir /data
+RUN chown 5000:5000 /data
+RUN mkdir -p /go/bin
+RUN chown -R 5000:5000 /go
+WORKDIR /go/bin
 RUN adduser -D -u 5000 -g 5000 app
 USER app:app
-WORKDIR /data
-WORKDIR /go/bin
 # copy files from build stage that are required at runtime
 COPY --from=build /go/bin/usrvtodo /go/bin/
 COPY --from=build /go/src/usrvtodo/index.tmpl /go/bin/
 COPY --from=build /go/src/usrvtodo/error.tmpl /go/bin/
-COPY --from=build /go/src/usrvtodo/todo.db /data/
 EXPOSE 8080
 VOLUME /data
 CMD ["/go/bin/usrvtodo"]

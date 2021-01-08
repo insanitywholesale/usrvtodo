@@ -28,6 +28,13 @@ type UpdateTodoInput struct {
 
 var DB *gorm.DB
 
+func createDefaultTodos() {
+	todo1 := Todo{Desc: "host usrvtodo on distro.watch", Done: true}
+	todo2 := Todo{Desc: "deploy usrvtodo on k3s", Done: false}
+	DB.Create(&todo1)
+	DB.Create(&todo2)
+}
+
 func ConnectDB() {
 	dbPath := "todo.db"
 	if os.Getenv("DB_PATH") != "" {
@@ -41,6 +48,7 @@ func ConnectDB() {
 	log.Println("connected to database:", db)
 	db.AutoMigrate(&Todo{})
 	DB = db
+	createDefaultTodos()
 }
 
 func GetTodos(c *gin.Context) {
