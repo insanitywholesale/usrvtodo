@@ -1,0 +1,11 @@
+kind: pipeline
+name: default
+type: kubernetes
+
+steps:
+  - name: usrvtodo
+    image: golang
+    commands:
+      - go get -v
+      - go build -v
+      - go test -v
