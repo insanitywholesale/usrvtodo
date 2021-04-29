@@ -7,5 +7,6 @@ steps:
     image: golang
     commands:
       - go get -v
+      - go vet -v
       - go build -v
       - go test -v
