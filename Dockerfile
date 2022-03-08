@@ -26,7 +26,7 @@ ENV DB_PATH /data/todo.db
 ENV GIN_MODE release
 # add and use non-root user
 RUN mkdir /data
-RUN chown 5000:5000 /data
+RUN chown -R 5000:5000 /data
 RUN mkdir -p /go/bin
 RUN chown -R 5000:5000 /go
 WORKDIR /go/bin
