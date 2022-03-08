@@ -1,13 +1,14 @@
 package main
 
 import (
+	"log"
+	"net/http"
+	"os"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"log"
-	"net/http"
-	"strconv"
-	"os"
 )
 
 type Todo struct {
@@ -18,12 +19,12 @@ type Todo struct {
 
 type CreateTodoInput struct {
 	Desc string `json:"desc" binding:"required"`
-	Done bool `json:"done" binding:"required"`
+	Done bool   `json:"done" binding:"required"`
 }
 
 type UpdateTodoInput struct {
 	Desc string `json:"desc"`
-	Done bool `json:"done"`
+	Done bool   `json:"done"`
 }
 
 var DB *gorm.DB
