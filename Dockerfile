@@ -7,6 +7,7 @@ WORKDIR /go/src/usrvtodo
 COPY *go* ./
 COPY *tmpl ./
 RUN go get -d -v
+#OUTDATED COMMENT, keeping for historical reasons
 # this doesn't actually work fully
 # workaround in run stage is for this
 # after adding the tags, one of the previous errors went away
@@ -18,6 +19,7 @@ RUN go install -v
 # busybox was giving me:
 # standard_init_linux.go:211: exec user process caused "no such file or directory"
 FROM alpine
+#OUTDATED COMMENT, keeping for historical reasons
 # unable to link fully statically so this is needed
 #COPY --from=build /lib/x86*/libdl* /lib/
 # set path for database
