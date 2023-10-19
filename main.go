@@ -208,6 +208,6 @@ func main() {
 	r.POST("/todo/edit", UpdateTodo2)
 	r.POST("/todo/delete", DeleteTodo2)
 	// if env var PORT is set, it will use that
-	r.Run()
-	log.Println("they see me loggin', they hatin'")
+	err := r.Run()
+	log.Fatal("error starting HTTP server:", err)
 }
