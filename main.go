@@ -43,8 +43,7 @@ func ConnectDB() {
 	}
 	db, err := gorm.Open("sqlite3", dbPath)
 	if err != nil {
-		//panic("Failed to connect to database!")
-		log.Println("DB error:", err)
+		log.Fatal("DB error:", err)
 	}
 	log.Println("connected to database:", db)
 	db.AutoMigrate(&Todo{})
@@ -114,7 +113,7 @@ func GetTodos2(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.tmpl", todos)
 }
 
-func GetTodo2(c *gin.Context) { //actually implement this
+func GetTodo2(c *gin.Context) { // actually implement this
 	formID := c.PostForm("id")
 	id, err := strconv.ParseInt(formID, 10, 64)
 	if err != nil {
@@ -195,20 +194,20 @@ func DeleteTodo2(c *gin.Context) {
 func main() {
 	ConnectDB()
 	r := gin.Default()
-	//standard api routes
+	// standard api routes
 	r.GET("/api/todo", GetTodos)
 	r.GET("/api/todo/:id", GetTodo)
 	r.POST("/api/todo", CreateTodo)
 	r.PATCH("/api/todo/:id", UpdateTodo)
 	r.DELETE("/api/todo/:id", DeleteTodo)
-	//browser api routes
+	// browser api routes
 	r.LoadHTMLGlob("./*.tmpl")
 	r.GET("/todo", GetTodos2)
-	r.GET("/todo/get", GetTodo2) //fix to get id some way
+	r.GET("/todo/get", GetTodo2) // fix to get id some way
 	r.POST("/todo/new", CreateTodo2)
 	r.POST("/todo/edit", UpdateTodo2)
 	r.POST("/todo/delete", DeleteTodo2)
-	//if env var PORT is set, it will use that
+	// if env var PORT is set, it will use that
 	r.Run()
 	log.Println("they see me loggin', they hatin'")
 }
